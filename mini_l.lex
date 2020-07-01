@@ -3,6 +3,8 @@ int position = 1;
 int currentLine = 1;
 %}
 
+Letter [a-zA-Z]
+Digit [0-9]
 %%
 function {printf("FUNCTION\n");position= position + yyleng;}
 beginparams {printf("BEGIN_PARAMS\n");position= position + yyleng;}
@@ -53,10 +55,12 @@ return {printf("RETURN\n");position= position + yyleng;}
 "]" {printf("R_SQUARE_BRACKET\n");position= position + yyleng;}
 ":=" {printf("ASSIGN\n");position= position + yyleng;}
 
-[0-9]+[a-z][a-z0-9\_]* {printf("Error at line %d, column %d: identifier \"%s\" must begin with a letter\n", currentLine, position, yytext); exit(1);}
+[0-9]+{Letter}((({Letter}|{Digit})|_)*({Letter}|{Digit})+)* {printf("Error at line %d, column %d: identifier \"%s\" must begin with a letter\n", currentLine, position, yytext); exit(1);}
 [0-9]+ {printf("NUMBER %s\n", yytext);position= position + yyleng;}
-[a-z][a-z0-9\_]*\_ {printf("Error at line %d, column %d: identifier \"%s\" cannot end with an underscore\n", currentLine, position, yytext); exit(1);}
-[a-z][a-z0-9\_]* {printf("IDENT %s\n", yytext);position= position + yyleng;} 
+{Letter}((({Letter}|{Digit})|_)*({Letter}|{Digit})+)*_ {printf("Error at line %d, column %d: identifier \"%s\" cannot end with an underscore\n", currentLine, position, yytext); exit(1);}
+{Letter}((({Letter}|{Digit})|_)*({Letter}|{Digit})+)* {printf("IDENT %s\n", yytext);position= position + yyleng;}
+(_)+({Letter}((({Letter}|{Digit})|_)*({Letter}|{Digit})+)*) {printf("Error at line %d, column %d: identifier \"%s\" must not begin with underscore\n", currentLine, position, yytext); exit(1);}
+
 [ \t ]+ {position= position + yyleng;}
 "##".*  {position= position + yyleng;}
 "\n" {currentLine = currentLine + 1; position = 1;}
