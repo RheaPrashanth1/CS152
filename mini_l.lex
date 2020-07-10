@@ -1,4 +1,5 @@
 %{
+#include "y.tab.h"
 int position = 1;
 int currentLine = 1;
 %}
